@@ -1,5 +1,5 @@
 {
-  "name": "schema-validator",
+  "name": "@nib/schema-validator",
   "version": "1.0.0",
   "description": "Extends js-validator-chain to enable the re-use of object validation for the server side. The server can use the same validation rules as the frontend for its api contracts.",
   "main": "index.js",
