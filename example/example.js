@@ -4,14 +4,14 @@ function required(value) {
   return value !== '';
 }
 
-function minEightCharacters(value) {
+function minFourCharacters(value) {
   return value.length >= 4;
 }
 
 const schema = {
   firstName: [
     [required, 'First name is required'],
-    [minEightCharacters, 'First name needs to be atleast 8 characters']
+    [minFourCharacters, 'First name needs to be at least 8 characters']
   ]
 }
 

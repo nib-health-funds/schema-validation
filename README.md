@@ -5,18 +5,21 @@ rules into a single validation chain, enabling the validation of a whole object 
 
 ## Usage
 
+In the following example we are using schema validate to compile the rules for each property of an object and validating a object against them.
+To share the validation rules between the server and the client simply share a package with the schema(s) for the objects you will be validating.
+
     function required(value) {
       return value !== '';
     }
 
-    function minEightCharacters(value) {
+    function minFourCharacters(value) {
       return value.length >= 4;
     }
 
     const schema = {
       firstName: [
         [required, 'First name is required'],
-        [minEightCharacters, 'First name needs to be atleast 8 characters']
+        [minFourCharacters, 'First name needs to be at least 8 characters']
       ]
     }
 
