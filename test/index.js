@@ -1,6 +1,5 @@
 'use strict';
 const schemaValidator = require('../index.js');
-const validatorChain = require('@digitaledgeit/validator-chain');
 const assert = require('assert');
 
 describe('schema-validator', () => {
