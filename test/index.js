@@ -115,7 +115,7 @@ describe('schema-validator', () => {
 
     });
 
-    it('should return false when one out of many schema rule is invalid for single property', (done) => {
+    it('should return false when one out of many schema rules is invalid for single property', (done) => {
 
       function required(value) {
         return value !== '';
