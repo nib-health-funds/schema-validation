@@ -32,8 +32,8 @@ const values = {
 };
 
 validator.all(schema, values).then(result => {
-  console.log(result.valid);
-  console.log(result.errors);
+  console.log(result.valid);  //false
+  console.log(result.errors); //{email: 'Email must be a valid email address'}
 });
 
 ```
