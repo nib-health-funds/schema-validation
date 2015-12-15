@@ -1,19 +1,8 @@
 {
   "root": true,
   "env": {
-    "browser":  false,
-    "node":     true,
-    "es6":      true,
-    "mocha":    true
-  },
-  "ecmaFeatures": {
-    "spread": false,
-    "destructing": false,
-    "experimentalObjectRestSpread": false
-  },
-  "rules": {
-    "comma-dangle": 0,
-    "import/no-require": 0
+    "node": true,
+    "mocha": true
   },
   "extends": "eslint-config-jameslnewell/node"
 }

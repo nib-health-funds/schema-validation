@@ -1,26 +1,23 @@
 'use strict';
-const schemaValidator = require('../index.js');
 const assert = require('assert');
+const validator = require('..');
+const validate = require('@nib/validation-methods');
 
 describe('schema-validator', () => {
 
-  describe('validate', () => {
+  describe('.all()', () => {
 
     it('should return true when valid', (done) => {
 
-      function required(value) {
-        return value !== '';
-      }
-
       const schema = {
-        firstName: [[required, 'Your name is required']]
+        firstName: [[validate.required, 'Your name is required']]
       };
 
       const objectToValidate = {
         firstName: 'Im here'
       };
 
-      schemaValidator.validate(schema, objectToValidate).then((result) => {
+      validator.validate(schema, objectToValidate).then((result) => {
         assert(result.valid);
         done();
       }).catch((err) => {
@@ -32,14 +29,10 @@ describe('schema-validator', () => {
 
     it('should return true when valid for multiple properties on schema', (done) => {
 
-      function required(value) {
-        return value !== '';
-      }
-
       const schema = {
-        firstName: [[required, 'Your name is required']],
-        lastName: [[required, 'Your name is required']],
-        middleName: [[required, 'Your name is required']]
+        firstName: [[validate.required, 'Your name is required']],
+        lastName: [[validate.required, 'Your name is required']],
+        middleName: [[validate.required, 'Your name is required']]
       };
 
       const objectToValidate = {
@@ -50,7 +43,7 @@ describe('schema-validator', () => {
 
       assert(Object.keys(schema).length > 1);
 
-      schemaValidator.validate(schema, objectToValidate).then((result) => {
+      validator.validate(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, true);
         done();
       }).catch((err) => {
@@ -61,14 +54,10 @@ describe('schema-validator', () => {
 
     it('should return false when one property is in-valid', (done) => {
 
-      function required(value) {
-        return value !== '';
-      }
-
       const schema = {
-        firstName: [[required, 'Your name is required']],
-        lastName: [[required, 'Your name is required']],
-        middleName: [[required, 'Your name is required']]
+        firstName: [[validate.required, 'Your name is required']],
+        lastName: [[validate.required, 'Your name is required']],
+        middleName: [[validate.required, 'Your name is required']]
       };
 
       const objectToValidate = {
@@ -77,7 +66,7 @@ describe('schema-validator', () => {
         middleName: 'But not here'
       };
 
-      schemaValidator.validate(schema, objectToValidate).then((result) => {
+      validator.validate(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
         done();
       }).catch((err) => {
@@ -88,14 +77,10 @@ describe('schema-validator', () => {
 
     it('should return false when all properties are in-valid', (done) => {
 
-      function required(value) {
-        return value !== '';
-      }
-
       const schema = {
-        firstName: [[required, 'Your name is required']],
-        lastName: [[required, 'Your name is required']],
-        middleName: [[required, 'Your name is required']]
+        firstName: [[validate.required, 'Your name is required']],
+        lastName: [[validate.required, 'Your name is required']],
+        middleName: [[validate.required, 'Your name is required']]
       };
 
       const objectToValidate = {
@@ -106,7 +91,7 @@ describe('schema-validator', () => {
 
       assert(Object.keys(schema).length > 1);
 
-      schemaValidator.validate(schema, objectToValidate).then((result) => {
+      validator.validate(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
         done();
       }).catch((err) => {
@@ -117,18 +102,10 @@ describe('schema-validator', () => {
 
     it('should return false when one out of many schema rules is invalid for single property', (done) => {
 
-      function required(value) {
-        return value !== '';
-      }
-
-      function minEightCharacters(value) {
-        return value.length >= 8;
-      }
-
       const schema = {
         firstName: [
-          [required, 'Your name is required'],
-          [minEightCharacters, 'Name must be min 8 characters'],
+          [validate.required, 'Your name is required'],
+          [validate.minlength(8), 'Name must be min 8 characters']
         ]
       };
 
@@ -136,7 +113,7 @@ describe('schema-validator', () => {
         firstName: 'Apu'
       };
 
-      schemaValidator.validate(schema, objectToValidate).then((result) => {
+      validator.validate(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
         done();
       }).catch((err) => {
@@ -147,18 +124,10 @@ describe('schema-validator', () => {
 
     it('should return true when all schema rules are valid for single property', (done) => {
 
-      function required(value) {
-        return value !== '';
-      }
-
-      function minEightCharacters(value) {
-        return value.length >= 8;
-      }
-
       const schema = {
         firstName: [
-          [required, 'Your name is required'],
-          [minEightCharacters, 'Name must be min 8 characters'],
+          [validate.required, 'Your name is required'],
+          [validate.minlength(8), 'Name must be min 8 characters']
         ]
       };
 
@@ -166,12 +135,81 @@ describe('schema-validator', () => {
         firstName: 'MoreThanEightChars'
       };
 
-      schemaValidator.validate(schema, objectToValidate).then((result) => {
+      validator.validate(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, true);
         done();
       }).catch((err) => {
         done(err);
       });
+
+    });
+
+  });
+
+  describe('.partial()', () => {
+
+    it('should return true when there are no values', () => {
+
+      const schema = {
+        firstName: [[validate.required, 'Your first name is required']],
+        lastName: [[validate.required, 'Your last name is required']]
+      };
+
+      return validator.partial(schema, {})
+        .then(result => assert(result.valid))
+        ;
+
+    });
+
+    it('should return true when there are no invalid values', () => {
+
+      const schema = {
+        firstName: [[validate.required, 'Your first name is required']],
+        lastName: [[validate.required, 'Your last name is required']]
+      };
+
+      return validator.partial(schema, {firstName: 'Matt', lastName: 'Smith'})
+        .then(result => assert(result.valid))
+        ;
+
+    });
+
+    it('should return false when there is an invalid value', () => {
+
+      const schema = {
+        firstName: [[validate.required, 'Your first name is required']],
+        lastName: [[validate.required, 'Your last name is required']]
+      };
+
+      return validator.partial(schema, {firstName: ''})
+        .then(result => assert(!result.valid))
+        ;
+
+    });
+
+    it('should not return an error when there are no invalid values', () => {
+
+      const schema = {
+        firstName: [[validate.required, 'Your first name is required']],
+        lastName: [[validate.required, 'Your last name is required']]
+      };
+
+      return validator.partial(schema, {firstName: 'Matt'})
+        .then(result => assert.deepEqual(result.errors, {}))
+        ;
+
+    });
+
+    it('should return an error when there is a invalid value', () => {
+
+      const schema = {
+        firstName: [[validate.required, 'Your first name is required']],
+        lastName: [[validate.required, 'Your last name is required']]
+      };
+
+      return validator.partial(schema, {firstName: ''})
+        .then(result => assert.equal(result.errors.firstName, 'Your first name is required'))
+        ;
 
     });
 

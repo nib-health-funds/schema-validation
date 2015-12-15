@@ -1,19 +1,21 @@
 {
   "name": "@nib/schema-validator",
-  "version": "1.0.0",
   "description": "Extends js-validator-chain to enable the re-use of object validation for the server side. The server can use the same validation rules as the frontend for its api contracts.",
-  "main": "index.js",
-  "scripts": {
-    "test": "node_modules/.bin/mocha test/*.js --recursive",
-    "test.watch": "node_modules/.bin/mocha test/*.js --recursive --watch"
-  },
+  "version": "2.0.0",
+  "main": "lib/index.js",
   "dependencies": {
     "@digitaledgeit/validator-chain": "^0.3.0"
   },
   "devDependencies": {
+    "@nib/validation-methods": "^1.1.0",
     "eslint": "^1.9.0",
-    "eslint-config-jameslnewell": "^0.3.5",
+    "eslint-config-jameslnewell": "^0.4.0",
     "mocha": "^2.3.3"
+  },
+  "scripts": {
+    "lint": "eslint **/*.js",
+    "test": "node_modules/.bin/mocha test/*.js --recursive",
+    "test.watch": "node_modules/.bin/mocha test/*.js --recursive --watch"
   },
   "author": "James Newell, Shannon Marsh, Matthew Turner"
 }

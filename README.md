@@ -1,33 +1,50 @@
-# schema-validator
-Extends js-validator-chain to enable the re-use of object validation for the server side.
-The server can use the same validation rules as the frontend for its api contracts by compiling multiple property
-rules into a single validation chain, enabling the validation of a whole object and all its properties at once.
+# @nib/schema-validator
+
+A Universal-JavaScript utility for validating value dictionaries.
+
+## Installation
+
+    npm install --save @nib/schema-validator
 
 ## Usage
 
-In the following example we are using schema validate to compile the rules for each property of an object and validating a object against them.
-To share the validation rules between the server and the client simply share a package with the schema(s) for the objects you will be validating.
+```javascript
 
-    function required(value) {
-      return value !== '';
-    }
+const validator = require('@nib/schema-validator');
+const validate = require('@nib/validation-methods');
 
-    function minFourCharacters(value) {
-      return value.length >= 4;
-    }
+const schema = {
 
-    const schema = {
-      firstName: [
-        [required, 'First name is required'],
-        [minFourCharacters, 'First name needs to be at least 8 characters']
-      ]
-    }
+  name: [
+    [validate.required, 'Name is required'],
+    [validate.minlength(5), 'Name must be at least 5 characters']
+  ],
 
-    const objectToValidate = {
-      firstName: 'Apu'
-    }
+  email: [
+    [validate.required, 'Email is required'],
+    [validate.email, 'Email must be a valid email address']
+  ]
 
-    schemaValidator.validate(schema, objectToValidate).then((result) => {
-      console.log(result.valid);
-      console.log(result.errors);
-    });
+};
+
+const values = {
+  name: 'Homer'
+};
+
+validator.all(schema, values).then(result => {
+  console.log(result.valid);
+  console.log(result.errors);
+});
+
+```
+
+## API
+
+### .all(schema, values)
+
+Validate all the fields, even where values are not provided.
+
+### .partial(schema, values)
+
+Validate only the fields where a value was provided.
+

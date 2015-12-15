@@ -1,33 +1,33 @@
-const schemaValidator = require('@nib/schema-validator');
-
-function required(value) {
-  return value !== '';
-}
-
-function minFourCharacters(value) {
-  return value.length >= 4;
-}
+const validator = require('..');
+const validate = require('@nib/validation-methods');
 
 const schema = {
-  firstName: [
-    [required, 'First name is required'],
-    [minFourCharacters, 'First name needs to be at least 8 characters']
+
+  name: [
+    [validate.required, 'Name is required'],
+    [validate.minlength(5), 'Name must be at least 5 characters']
+  ],
+
+  email: [
+    [validate.required, 'Email is required'],
+    [validate.email, 'Email must be a valid email address']
   ]
-}
 
-const badEgg = {
-  firstName: 'Apu'
-}
+};
 
-const goodEgg = {
-  firstName: 'Matthew'
-}
+const values1 = {
+  name: 'Homer'
+};
 
-schemaValidator.validate(schema, badEgg).then((result) => {
-  console.log(result.valid);
-  console.log(result.errors);
+validator.all(schema, values1).then(result => {
+  console.log(result.valid, result.errors);
 });
 
-schemaValidator.validate(schema, goodEgg).then((result) => {
-  console.log(result.valid);
+const values2 = {
+  name: 'Homer',
+  email: 'homer@simpson.com'
+};
+
+validator.all(schema, values2).then(result => {
+  console.log(result.valid, result.errors);
 });
