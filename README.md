@@ -1,6 +1,6 @@
 # @nib/schema-validator
 
-A Universal-JavaScript utility for validating value dictionaries.
+A Universal-JavaScript utility for validating value objects.
 
 ## Installation
 
