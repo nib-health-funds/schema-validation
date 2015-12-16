@@ -15,9 +15,14 @@ const validate = require('@nib/validation-methods');
 
 const schema = {
 
-  name: [
-    [validate.required, 'Name is required'],
-    [validate.minlength(5), 'Name must be at least 5 characters']
+  firstName: [
+    [validate.required, 'First name is required'],
+    [validate.minlength(5), 'First name must be at least 5 characters']
+  ],
+
+  lastName: [
+    [validate.required, 'Last name is required'],
+    [validate.minlength(5), 'Last name must be at least 5 characters']
   ],
 
   email: [
@@ -28,11 +33,13 @@ const schema = {
 };
 
 const values = {
-  name: 'Homer'
+  firstName: 'Homer',
+  email: 'homer.$#%@!'
 };
 
 validator.all(schema, values).then(result => {
   console.log(result.valid);  //false
+  console.log(result.values); //{firstName: 'Homer'}
   console.log(result.errors); //{email: 'Email must be a valid email address'}
 });
 
@@ -40,11 +47,11 @@ validator.all(schema, values).then(result => {
 
 ## API
 
-### .all(schema, values)
+### .all(schema, values) : Promise
 
 Validate all the fields, even where values are not provided.
 
-### .partial(schema, values)
+### .partial(schema, values) : Promise
 
 Validate only the fields where a value was provided.
 

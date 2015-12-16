@@ -17,7 +17,7 @@ describe('schema-validator', () => {
         firstName: 'Im here'
       };
 
-      validator.validate(schema, objectToValidate).then((result) => {
+      validator.all(schema, objectToValidate).then((result) => {
         assert(result.valid);
         done();
       }).catch((err) => {
@@ -43,7 +43,7 @@ describe('schema-validator', () => {
 
       assert(Object.keys(schema).length > 1);
 
-      validator.validate(schema, objectToValidate).then((result) => {
+      validator.all(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, true);
         done();
       }).catch((err) => {
@@ -66,7 +66,7 @@ describe('schema-validator', () => {
         middleName: 'But not here'
       };
 
-      validator.validate(schema, objectToValidate).then((result) => {
+      validator.all(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
         done();
       }).catch((err) => {
@@ -91,7 +91,7 @@ describe('schema-validator', () => {
 
       assert(Object.keys(schema).length > 1);
 
-      validator.validate(schema, objectToValidate).then((result) => {
+      validator.all(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
         done();
       }).catch((err) => {
@@ -113,7 +113,7 @@ describe('schema-validator', () => {
         firstName: 'Apu'
       };
 
-      validator.validate(schema, objectToValidate).then((result) => {
+      validator.all(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
         done();
       }).catch((err) => {
@@ -135,12 +135,25 @@ describe('schema-validator', () => {
         firstName: 'MoreThanEightChars'
       };
 
-      validator.validate(schema, objectToValidate).then((result) => {
+      validator.all(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, true);
         done();
       }).catch((err) => {
         done(err);
       });
+
+    });
+
+    it('should return values of valid fields', () => {
+
+      const schema = {
+        firstName: [[validate.required, 'Your first name is required']],
+        lastName: [[validate.required, 'Your last name is required']]
+      };
+
+      return validator.all(schema, {firstName: 'Matt'})
+        .then(result => assert.deepEqual(result.values, {firstName: 'Matt'}))
+        ;
 
     });
 
@@ -157,7 +170,20 @@ describe('schema-validator', () => {
 
       return validator.partial(schema, {})
         .then(result => assert(result.valid))
-        ;
+      ;
+
+    });
+
+    it('should return true when there are no values', () => {
+
+      const schema = {
+        firstName: [[validate.required, 'Your first name is required']],
+        lastName: [[validate.required, 'Your last name is required']]
+      };
+
+      return validator.partial(schema, {})
+        .then(result => assert(result.valid))
+      ;
 
     });
 
@@ -170,7 +196,7 @@ describe('schema-validator', () => {
 
       return validator.partial(schema, {firstName: 'Matt', lastName: 'Smith'})
         .then(result => assert(result.valid))
-        ;
+      ;
 
     });
 
@@ -183,7 +209,20 @@ describe('schema-validator', () => {
 
       return validator.partial(schema, {firstName: ''})
         .then(result => assert(!result.valid))
-        ;
+      ;
+
+    });
+
+    it('should return values of valid fields', () => {
+
+      const schema = {
+        firstName: [[validate.required, 'Your first name is required']],
+        lastName: [[validate.required, 'Your last name is required']]
+      };
+
+      return validator.partial(schema, {firstName: 'Matt'})
+        .then(result => assert.deepEqual(result.values, {firstName: 'Matt'}))
+      ;
 
     });
 
@@ -196,7 +235,7 @@ describe('schema-validator', () => {
 
       return validator.partial(schema, {firstName: 'Matt'})
         .then(result => assert.deepEqual(result.errors, {}))
-        ;
+      ;
 
     });
 
@@ -209,7 +248,7 @@ describe('schema-validator', () => {
 
       return validator.partial(schema, {firstName: ''})
         .then(result => assert.equal(result.errors.firstName, 'Your first name is required'))
-        ;
+      ;
 
     });
 

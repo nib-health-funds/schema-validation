@@ -3,9 +3,14 @@ const validate = require('@nib/validation-methods');
 
 const schema = {
 
-  name: [
-    [validate.required, 'Name is required'],
-    [validate.minlength(5), 'Name must be at least 5 characters']
+  firstName: [
+    [validate.required, 'First name is required'],
+    [validate.minlength(5), 'First name must be at least 5 characters']
+  ],
+
+  lastName: [
+    [validate.required, 'Last name is required'],
+    [validate.minlength(5), 'Last name must be at least 5 characters']
   ],
 
   email: [
@@ -16,18 +21,20 @@ const schema = {
 };
 
 const values1 = {
-  name: 'Homer'
+  firstName: 'Homer',
+  email: 'homer.$#%@!'
 };
 
 validator.all(schema, values1).then(result => {
-  console.log(result.valid, result.errors);
+  console.log(result.valid, result.values, result.errors);
 });
 
 const values2 = {
-  name: 'Homer',
+  firstName: 'Homer',
+  lastName: 'Simpson',
   email: 'homer@simpson.com'
 };
 
 validator.all(schema, values2).then(result => {
-  console.log(result.valid, result.errors);
+  console.log(result.valid, result.values, result.errors);
 });
