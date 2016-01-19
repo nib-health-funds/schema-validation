@@ -4,13 +4,14 @@
   "version": "2.1.0",
   "main": "lib/index.js",
   "dependencies": {
+    "@digitaledgeit/filter-chain": "^0.3.0",
     "@digitaledgeit/validator-chain": "^0.3.0"
   },
   "devDependencies": {
     "@nib/validation-methods": "^1.1.0",
     "eslint": "^1.9.0",
     "eslint-config-jameslnewell": "^0.4.0",
-    "mocha": "^2.3.3"
+    "mocha": "^2.3.4"
   },
   "scripts": {
     "lint": "eslint **/*.js",
