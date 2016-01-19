@@ -272,23 +272,42 @@ describe('schema-validator', () => {
         lastName: [[validate.required, 'Your last name is required']]
       };
 
-      return validator.partial(schema, {})
+      return validator.partial(filters, schema, {})
         .then(result => assert(result.valid))
       ;
 
     });
 
-    it('should return true when there are no values', () => {
-
+    it('should apply filter to multiple values before validating', (done) => {
+      
       schema = {
         firstName: [[validate.required, 'Your first name is required']],
-        lastName: [[validate.required, 'Your last name is required']]
+        lastName: [[validate.required, 'Your last name is required']],
+        phoneNumber: [[validate.required, 'Your phoneNumber is required'],
+                      [validate.maxlength(10), 'Your phone number is too long']]
+      };
+ 
+      filters = {
+        firstName: [removeWhitespaceWithDelay],
+        phoneNumber: [removeWhitespaceWithDelay]
       };
 
-      return validator.partial(schema, {})
-        .then(result => assert(result.valid))
-      ;
+      const objectToValidate = {
+        firstName: 'Mar io',  // deliberately leave out last name for partial validation
+        phoneNumber: '02 9999 5555'
+      };
 
+      validator.partial(filters, schema, objectToValidate).then((result) => {
+        
+        assert(result.valid);
+        assert.equal(result.values.firstName, 'Mario');
+        assert.equal(result.values.phoneNumber, '0299995555');
+        done();
+      }).catch((err) => {
+        done(err);
+      });
+
+      
     });
 
     it('should return true when there are no invalid values', () => {
@@ -298,7 +317,7 @@ describe('schema-validator', () => {
         lastName: [[validate.required, 'Your last name is required']]
       };
 
-      return validator.partial(schema, {firstName: 'Matt', lastName: 'Smith'})
+      return validator.partial(filters, schema, {firstName: 'Matt', lastName: 'Smith'})
         .then(result => assert(result.valid))
       ;
 
@@ -311,7 +330,7 @@ describe('schema-validator', () => {
         lastName: [[validate.required, 'Your last name is required']]
       };
 
-      return validator.partial(schema, {firstName: ''})
+      return validator.partial(filters, schema, {firstName: ''})
         .then(result => assert(!result.valid))
       ;
 
@@ -324,7 +343,7 @@ describe('schema-validator', () => {
         lastName: [[validate.required, 'Your last name is required']]
       };
 
-      return validator.partial(schema, {firstName: 'Matt'})
+      return validator.partial(filters, schema, {firstName: 'Matt'})
         .then(result => assert.deepEqual(result.values, {firstName: 'Matt'}))
       ;
 
@@ -337,7 +356,7 @@ describe('schema-validator', () => {
         lastName: [[validate.required, 'Your last name is required']]
       };
 
-      return validator.partial(schema, {firstName: 'Matt'})
+      return validator.partial(filters, schema, {firstName: 'Matt'})
         .then(result => assert.deepEqual(result.errors, {}))
       ;
 
@@ -350,7 +369,7 @@ describe('schema-validator', () => {
         lastName: [[validate.required, 'Your last name is required']]
       };
 
-      return validator.partial(schema, {firstName: ''})
+      return validator.partial(filters, schema, {firstName: ''})
         .then(result => assert.equal(result.errors.firstName, 'Your first name is required'))
       ;
 
