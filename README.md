@@ -13,7 +13,7 @@ A Universal-JavaScript utility for validating value objects.
 const validator = require('@nib/schema-validator');
 const validate = require('@nib/validation-methods');
 
-const schema = {
+const schemaValidationRules = {
 
   firstName: [
     [validate.required, 'First name is required'],
@@ -25,6 +25,11 @@ const schema = {
     [validate.minlength(5), 'Last name must be at least 5 characters']
   ],
 
+  phoneNumber: [
+    [validate.required, 'Phone number is required'],
+    [validate.maxlength(10), 'Phone number must be no more than 10 digits']
+  ],
+
   email: [
     [validate.required, 'Email is required'],
     [validate.email, 'Email must be a valid email address']
@@ -32,14 +37,23 @@ const schema = {
 
 };
 
+function removeWhitespace(value) {
+  return value.replace(/\s*/g, '');
+}
+
+const schemaFilters = {
+  phoneNumber: [removeWhitespace]
+}
+
 const values = {
   firstName: 'Homer',
+  phoneNumber: '02 9999 5555',
   email: 'homer.$#%@!'
 };
 
-validator.all(schema, values).then(result => {
+validator.all(schemaFilters, schemaValidationRules, values).then(result => {
   console.log(result.valid);  //false
-  console.log(result.values); //{firstName: 'Homer'}
+  console.log(result.values); //{firstName: 'Homer', phoneNumber: '0299995555'}
   console.log(result.errors); //{email: 'Email must be a valid email address'}
 });
 
@@ -47,11 +61,11 @@ validator.all(schema, values).then(result => {
 
 ## API
 
-### .all(schema, values) : Promise
+### .all(schemaFilters, schemaValidationRules, values) : Promise
 
 Validate all the fields, even where values are not provided.
 
-### .partial(schema, values) : Promise
+### .partial(schemaFilters, schemaValidationRules, values) : Promise
 
 Validate only the fields where a value was provided.
 
