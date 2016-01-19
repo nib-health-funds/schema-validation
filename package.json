@@ -1,7 +1,7 @@
 {
   "name": "@nib/schema-validator",
   "description": "A Universal-JavaScript utility for validating value objects.",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "main": "lib/index.js",
   "dependencies": {
     "@digitaledgeit/filter-chain": "^0.3.0",
