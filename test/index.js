@@ -131,6 +131,33 @@ describe('schema-validator', () => {
 
     }); 
 
+    it('should handle applying filter where object property has not been defined', (done) => {
+
+      schema = {
+        firstName: [[validate.maxlength(5), 'Your name is too long']],
+        phoneNumber: [[validate.required, 'Your phoneNumber is required'],
+                      [validate.maxlength(10), 'Your phone number is too long']]
+      };
+ 
+      filters = {
+        firstName: [removeWhitespaceWithDelay],
+        phoneNumber: [removeWhitespace]
+      };
+
+      const objectToValidate = {
+        firstName: 'Mar io'  // phoneNumber has not yet been defined        
+      };
+
+      validator.all(filters, schema, objectToValidate).then((result) => {  
+        assert.equal(result.valid, false);
+        assert.equal(result.values.firstName, 'Mario');
+        done();
+      }).catch((err) => {
+        done(err);
+      });
+
+    }); 
+
     it('should return true when valid for multiple properties on schema', (done) => {
 
       schema = {
