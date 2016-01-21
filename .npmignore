@@ -1,0 +1,7 @@
+test
+node_modules
+.vscode
+example/
+.idea
+lib
+!dist/lib
