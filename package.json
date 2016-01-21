@@ -1,22 +1,27 @@
 {
   "name": "@nib/schema-validator",
   "description": "A Universal-JavaScript utility for validating value objects.",
-  "version": "3.0.2",
-  "main": "lib/index.js",
+  "version": "4.0.0",
+  "main": "./dist/index.js",
   "dependencies": {
     "@digitaledgeit/filter-chain": "^0.3.0",
     "@digitaledgeit/validator-chain": "^0.3.0"
   },
   "devDependencies": {
     "@nib/validation-methods": "^1.1.0",
+    "babel-cli": "^6.4.5",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-register": "^6.4.3",
     "eslint": "^1.9.0",
-    "eslint-config-jameslnewell": "^0.4.0",
+    "eslint-config-jameslnewell": "0.4.2",
     "mocha": "^2.3.4"
   },
   "scripts": {
-    "lint": "eslint **/*.js",
-    "test": "node_modules/.bin/mocha test/*.js --recursive",
-    "test.watch": "node_modules/.bin/mocha test/*.js --recursive --watch"
+    "lint": "eslint lib/*.js test/*.js",
+    "test": "mocha --recursive --compilers js:babel-register",
+    "test.watch": "npm run test -- --watch",
+    "build": "babel lib/index.js -d ./dist --source-maps",
+    "prepublish": "npm run lint && npm run build && npm run test"
   },
   "author": "James Newell, Shannon Marsh, Matthew Turner"
 }

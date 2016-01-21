@@ -1,15 +1,15 @@
 'use strict';
 const assert = require('assert');
-const validator = require('..');
+const validator = require('../lib/index.js');
 const validate = require('@nib/validation-methods');
 
 function removeWhitespace(value) {
   return value.replace(/\s*/g, '');
 }
 
- function removeWhitespaceWithDelay(value, cb) {
-  setTimeout(function(){
-   cb(value.replace(/\s*/g, '')); 
+function removeWhitespaceWithDelay(value, cb) {
+  setTimeout(function() {
+    cb(value.replace(/\s*/g, '')); 
   }, 500);
 }
 
@@ -18,7 +18,7 @@ let schema = {};
 
 describe('schema-validator', () => {
 
-  beforeEach(() =>{
+  beforeEach(() => {
     filters = {};
     schema = {};
   });
