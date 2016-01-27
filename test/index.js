@@ -156,8 +156,8 @@ describe('schema-validator', () => {
         done(err);
       });
 
-    }); 
-
+    });
+    
     it('should return true when valid for multiple properties on schema', (done) => {
 
       schema = {
@@ -291,6 +291,20 @@ describe('schema-validator', () => {
   });
 
   describe('.partial()', () => {
+
+    it('should reject when a property is not found on the schema', () => {
+
+      schema = {
+        firstName: [[validate.required, 'Your first name is required']],
+        lastName: [[validate.required, 'Your last name is required']]
+      };
+
+      return validator.partial(filters, schema, {foobar: 'hi'})
+        .then(() => assert(false))
+        .catch(err => assert.equal(err.message, 'Property foobar not found on schema'))
+      ;
+
+    });
 
     it('should return true when there are no values', () => {
 
