@@ -2,6 +2,7 @@
 const assert = require('assert');
 const validator = require('../lib/index.js');
 const validate = require('@nib/validation-methods');
+const defaulter = require('../lib/applyDefaults');
 
 function removeWhitespace(value) {
   return value.replace(/\s*/g, '');
@@ -15,6 +16,7 @@ function removeWhitespaceWithDelay(value, cb) {
 
 let filters = {};
 let schema = {};
+let defaults = {};
 
 describe('schema-validator', () => {
 
@@ -23,7 +25,7 @@ describe('schema-validator', () => {
     schema = {};
   });
 
-  describe('.all()', () => {
+  describe('.validate()', () => {
 
     it('should return true when valid', (done) => {
 
@@ -39,7 +41,7 @@ describe('schema-validator', () => {
         firstName: 'Im here'
       };
 
-      validator.all(filters, schema, objectToValidate).then((result) => {
+      validator.validate(defaults, filters, schema, objectToValidate).then((result) => {
         assert(result.valid);
         done();
       }).catch((err) => {
@@ -64,7 +66,7 @@ describe('schema-validator', () => {
         phoneNumber: '02 9999 5555'
       };
 
-      validator.all(filters, schema, objectToValidate).then((result) => {
+      validator.validate(defaults, filters, schema, objectToValidate).then((result) => {
         assert(result.valid);
         assert.equal(result.values.phoneNumber, '0299995555');
         done();
@@ -90,7 +92,7 @@ describe('schema-validator', () => {
         phoneNumber: '02 9999 5555'
       };
 
-      validator.all(filters, schema, objectToValidate).then((result) => {
+      validator.validate(defaults, filters, schema, objectToValidate).then((result) => {
         
         assert(result.valid);
         assert.equal(result.values.phoneNumber, '0299995555');
@@ -119,7 +121,7 @@ describe('schema-validator', () => {
         phoneNumber: '02 9999 5555'
       };
 
-      validator.all(filters, schema, objectToValidate).then((result) => {
+      validator.validate(defaults, filters, schema, objectToValidate).then((result) => {
         
         assert(result.valid);
         assert.equal(result.values.firstName, 'Mario');
@@ -148,7 +150,7 @@ describe('schema-validator', () => {
         firstName: 'Mar io'  // phoneNumber has not yet been defined        
       };
 
-      validator.all(filters, schema, objectToValidate).then((result) => {  
+      validator.validate(defaults, filters, schema, objectToValidate).then((result) => {  
         assert.equal(result.valid, false);
         assert.equal(result.values.firstName, 'Mario');
         done();
@@ -174,7 +176,7 @@ describe('schema-validator', () => {
 
       assert(Object.keys(schema).length > 1);
 
-      validator.all(filters, schema, objectToValidate).then((result) => {
+      validator.validate(defaults, filters, schema, objectToValidate).then((result) => {
         assert.equal(result.valid, true);
         done();
       }).catch((err) => {
@@ -197,7 +199,7 @@ describe('schema-validator', () => {
         middleName: 'But not here'
       };
 
-      validator.all(filters, schema, objectToValidate).then((result) => {
+      validator.validate(defaults, filters, schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
         done();
       }).catch((err) => {
@@ -222,7 +224,7 @@ describe('schema-validator', () => {
 
       assert(Object.keys(schema).length > 1);
 
-      validator.all(filters, schema, objectToValidate).then((result) => {
+      validator.validate(defaults, filters, schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
         done();
       }).catch((err) => {
@@ -244,7 +246,7 @@ describe('schema-validator', () => {
         firstName: 'Apu'
       };
 
-      validator.all(filters, schema, objectToValidate).then((result) => {
+      validator.validate(defaults, filters, schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
         done();
       }).catch((err) => {
@@ -266,7 +268,7 @@ describe('schema-validator', () => {
         firstName: 'MoreThanEightChars'
       };
 
-      validator.all(filters, schema, objectToValidate).then((result) => {
+      validator.validate(defaults, filters, schema, objectToValidate).then((result) => {
         assert.equal(result.valid, true);
         done();
       }).catch((err) => {
@@ -282,140 +284,70 @@ describe('schema-validator', () => {
         lastName: [[validate.required, 'Your last name is required']]
       };
 
-      return validator.all(filters, schema, {firstName: 'Matt'})
+      return validator.validate(defaults, filters, schema, {firstName: 'Matt'})
         .then(result => assert.deepEqual(result.values, {firstName: 'Matt'}))
         ;
-
     });
-
-  });
-
-  describe('.partial()', () => {
-
-    it('should reject when a property is not found on the schema', () => {
-
+    
+    it('should add defaulted field to result values', (done) => {
       schema = {
         firstName: [[validate.required, 'Your first name is required']],
-        lastName: [[validate.required, 'Your last name is required']]
+        defaultedProp: [[() => true, 'Straight through please.']]
       };
-
-      return validator.partial(filters, schema, {foobar: 'hi'})
-        .then(() => assert(false))
-        .catch(err => assert.equal(err.message, 'Property foobar not found on schema'))
-      ;
-
-    });
-
-    it('should return true when there are no values', () => {
-
-      schema = {
-        firstName: [[validate.required, 'Your first name is required']],
-        lastName: [[validate.required, 'Your last name is required']]
-      };
-
-      return validator.partial(filters, schema, {})
-        .then(result => assert(result.valid))
-      ;
-
-    });
-
-    it('should apply filter to multiple values before validating', (done) => {
       
-      schema = {
-        firstName: [[validate.required, 'Your first name is required']],
-        lastName: [[validate.required, 'Your last name is required']],
-        phoneNumber: [[validate.required, 'Your phoneNumber is required'],
-                      [validate.maxlength(10), 'Your phone number is too long']]
-      };
- 
-      filters = {
-        firstName: [removeWhitespaceWithDelay],
-        phoneNumber: [removeWhitespaceWithDelay]
+      defaults = {
+        defaultedProp: 'default'
       };
 
-      const objectToValidate = {
-        firstName: 'Mar io',  // deliberately leave out last name for partial validation
-        phoneNumber: '02 9999 5555'
+      return validator.validate(defaults, filters, schema, {firstName: 'Matt'})
+        .then(result => {
+          assert.equal(result.values.defaultedProp, 'default');
+          done();
+        }).catch(err => done(err));
+    });
+  });
+  
+  describe('applyDefaults()', () => {
+    it('should apply defaults to values when not found on schema', (done) => {
+      
+      const defaultsSchema = {
+        firstName: '',
+        phoneNumber: '',
+        scale: 'Single'
       };
-
-      validator.partial(filters, schema, objectToValidate).then((result) => {
-        
-        assert(result.valid);
-        assert.equal(result.values.firstName, 'Mario');
-        assert.equal(result.values.phoneNumber, '0299995555');
+      
+      const values = {
+        firstName: 'Bob',
+        phoneNumber: '0423234530'
+      };
+      
+      defaulter(defaultsSchema, values).then(defaultedValues => {
+        assert.equal(defaultedValues.scale, defaultsSchema.scale);
         done();
-      }).catch((err) => {
-        done(err);
       });
-
       
     });
-
-    it('should return true when there are no invalid values', () => {
-
-      schema = {
-        firstName: [[validate.required, 'Your first name is required']],
-        lastName: [[validate.required, 'Your last name is required']]
+    
+    it('should do nothing to already set property when property has a default value specified', (done) => {
+      
+      const defaultsSchema = {
+        firstName: 'John',
+        phoneNumber: '',
+        scale: 'Single'
       };
-
-      return validator.partial(filters, schema, {firstName: 'Matt', lastName: 'Smith'})
-        .then(result => assert(result.valid))
-      ;
-
-    });
-
-    it('should return false when there is an invalid value', () => {
-
-      schema = {
-        firstName: [[validate.required, 'Your first name is required']],
-        lastName: [[validate.required, 'Your last name is required']]
+      
+      const values = {
+        firstName: 'Bob',
+        phoneNumber: '0423234530'
       };
-
-      return validator.partial(filters, schema, {firstName: ''})
-        .then(result => assert(!result.valid))
-      ;
-
+      
+      defaulter(defaultsSchema, values).then(defaultedValues => {
+        assert.equal(defaultedValues.firstName, values.firstName);
+        done();
+      });
+      
     });
-
-    it('should return values of valid fields', () => {
-
-      schema = {
-        firstName: [[validate.required, 'Your first name is required']],
-        lastName: [[validate.required, 'Your last name is required']]
-      };
-
-      return validator.partial(filters, schema, {firstName: 'Matt'})
-        .then(result => assert.deepEqual(result.values, {firstName: 'Matt'}))
-      ;
-
-    });
-
-    it('should not return an error when there are no invalid values', () => {
-
-      schema = {
-        firstName: [[validate.required, 'Your first name is required']],
-        lastName: [[validate.required, 'Your last name is required']]
-      };
-
-      return validator.partial(filters, schema, {firstName: 'Matt'})
-        .then(result => assert.deepEqual(result.errors, {}))
-      ;
-
-    });
-
-    it('should return an error when there is a invalid value', () => {
-
-      schema = {
-        firstName: [[validate.required, 'Your first name is required']],
-        lastName: [[validate.required, 'Your last name is required']]
-      };
-
-      return validator.partial(filters, schema, {firstName: ''})
-        .then(result => assert.equal(result.errors.firstName, 'Your first name is required'))
-      ;
-
-    });
-
+    
   });
-
+  
 });

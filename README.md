@@ -45,13 +45,17 @@ const schemaFilters = {
   phoneNumber: [removeWhitespace]
 }
 
+const schemaDefaults = {
+  scale: 'Single'
+}
+
 const values = {
   firstName: 'Homer',
   phoneNumber: '02 9999 5555',
   email: 'homer.$#%@!'
 };
 
-validator.all(schemaFilters, schemaValidationRules, values).then(result => {
+validator.validate(schemaDefaults, schemaFilters, schemaValidationRules, values).then(result => {
   console.log(result.valid);  //false
   console.log(result.values); //{firstName: 'Homer', phoneNumber: '0299995555'}
   console.log(result.errors); //{email: 'Email must be a valid email address'}
@@ -61,11 +65,7 @@ validator.all(schemaFilters, schemaValidationRules, values).then(result => {
 
 ## API
 
-### .all(schemaFilters, schemaValidationRules, values) : Promise
+### .validate(schemaDefaults, schemaFilters, schemaValidationRules, values) : Promise
 
 Validate all the fields, even where values are not provided.
-
-### .partial(schemaFilters, schemaValidationRules, values) : Promise
-
-Validate only the fields where a value was provided.
 
