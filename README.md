@@ -8,7 +8,7 @@ A Universal-JavaScript utility for validating value objects.
 
 ## Usage
 
-```javascro[t
+```javascript
 const validator = require('@nib/schema/validator');
 const validate = require('@nib/validation-methods');
 
