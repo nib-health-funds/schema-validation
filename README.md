@@ -8,64 +8,92 @@ A Universal-JavaScript utility for validating value objects.
 
 ## Usage
 
-```javascript
-
-const validator = require('@nib/schema-validator');
+```javascro[t
+const validator = require('@nib/schema/validator');
 const validate = require('@nib/validation-methods');
 
-const schemaValidationRules = {
+function trim(value) {
+  return value.trim();
+}
 
-  firstName: [
-    [validate.required, 'First name is required'],
-    [validate.minlength(5), 'First name must be at least 5 characters']
-  ],
-
-  lastName: [
-    [validate.required, 'Last name is required'],
-    [validate.minlength(5), 'Last name must be at least 5 characters']
-  ],
-
-  phoneNumber: [
-    [validate.required, 'Phone number is required'],
-    [validate.maxlength(10), 'Phone number must be no more than 10 digits']
-  ],
-
-  email: [
-    [validate.required, 'Email is required'],
-    [validate.email, 'Email must be a valid email address']
-  ]
-
-};
-
-function removeWhitespace(value) {
+function stripWhitespace(value) {
   return value.replace(/\s*/g, '');
 }
 
-const schemaFilters = {
-  phoneNumber: [removeWhitespace]
-}
+const schema = {
 
-const schemaDefaults = {
-  scale: 'Single'
-}
+  firstName: {
+    filters: [trim],
+    validators: [
+      [validate.minlength(5), 'First name must be at least 5 characters']
+    ],
+    empty: {
+      default: null
+    }
+  },
 
-const values = {
+  lastName: {
+    filters: [trim],
+    validators: [
+      [validate.minlength(5), 'Last name must be at least 5 characters']
+    ],
+    empty: {
+      default: null
+    }
+  },
+
+  phoneNumber: {
+    filters: [stripWhitespace],
+    validators: [
+     [validate.maxlength(10), 'Phone number must be no more than 10 digits']
+    ],
+    empty: {
+      default: null
+    }
+  },
+
+  email: {
+    filters: [trim],
+    validators: [
+      [validate.email, 'Email must be a valid email address']
+    ],
+    empty: {
+      default: null
+    }
+  }
+
+};
+
+const values1 = {
   firstName: 'Homer',
   phoneNumber: '02 9999 5555',
   email: 'homer.$#%@!'
 };
 
-validator.validate(schemaDefaults, schemaFilters, schemaValidationRules, values).then(result => {
+validator.validate(schema, values1).then(result => {
   console.log(result.valid);  //false
-  console.log(result.values); //{firstName: 'Homer', phoneNumber: '0299995555'}
+  console.log(result.values); //{firstName: 'Homer', lastName: null, phoneNumber: '0299995555'}
   console.log(result.errors); //{email: 'Email must be a valid email address'}
+});
+
+const values2 = {
+  firstName: 'Homer',
+  lastName: 'Simpson',
+  email: 'homer@simpson.com'
+};
+
+validator.validate(schema, values2).then(result => {
+  console.log(result.valid, result.values, result.errors);
+  console.log(result.valid);  //true
+  console.log(result.values); //{firstName: 'Homer', lastName: 'Simpson, phoneNumber: null, email: 'homer@simpson.com'}
+  console.log(result.errors); //{}
 });
 
 ```
 
 ## API
 
-### .validate(schemaDefaults, schemaFilters, schemaValidationRules, values) : Promise
+### .validate(schema, values) : Promise
 
 Validate all the fields, even where values are not provided.
 
