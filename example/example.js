@@ -1,32 +1,68 @@
 const validator = require('..');
 const validate = require('@nib/validation-methods');
 
+function trim(value) {
+  return value.trim();
+}
+
+function stripWhitespace(value) {
+  return value.replace(/\s*/g, '');
+}
+
 const schema = {
 
-  firstName: [
-    [validate.required, 'First name is required'],
-    [validate.minlength(5), 'First name must be at least 5 characters']
-  ],
+  firstName: {
+    filters: [trim],
+    validators: [
+      [validate.minlength(5), 'First name must be at least 5 characters']
+    ],
+    empty: {
+      default: null
+    }
+  },
 
-  lastName: [
-    [validate.required, 'Last name is required'],
-    [validate.minlength(5), 'Last name must be at least 5 characters']
-  ],
+  lastName: {
+    filters: [trim],
+    validators: [
+      [validate.minlength(5), 'Last name must be at least 5 characters']
+    ],
+    empty: {
+      default: null
+    }
+  },
 
-  email: [
-    [validate.required, 'Email is required'],
-    [validate.email, 'Email must be a valid email address']
-  ]
+  phoneNumber: {
+    filters: [stripWhitespace],
+    validators: [
+     [validate.maxlength(10), 'Phone number must be no more than 10 digits']
+    ],
+    empty: {
+      default: null
+    }
+  },
+
+  email: {
+    filters: [trim],
+    validators: [
+      [validate.email, 'Email must be a valid email address']
+    ],
+    empty: {
+      default: null
+    }
+  }
 
 };
 
 const values1 = {
   firstName: 'Homer',
+  phoneNumber: '02 9999 5555',
   email: 'homer.$#%@!'
 };
 
-validator.all(schema, values1).then(result => {
-  console.log(result.valid, result.values, result.errors);
+validator.validate(schema, values1).then(result => {
+  console.log(result.valid);  //false
+  console.log(result.values); //{firstName: 'Homer', lastName: null, phoneNumber: '0299995555'}
+  console.log(result.errors); //{email: 'Email must be a valid email address'}
 });
 
 const values2 = {
@@ -35,6 +71,9 @@ const values2 = {
   email: 'homer@simpson.com'
 };
 
-validator.all(schema, values2).then(result => {
+validator.validate(schema, values2).then(result => {
   console.log(result.valid, result.values, result.errors);
+  console.log(result.valid);  //true
+  console.log(result.values); //{firstName: 'Homer', lastName: 'Simpson, phoneNumber: null, email: 'homer@simpson.com'}
+  console.log(result.errors); //{}
 });
