@@ -10,8 +10,8 @@ function removeWhitespace(value) {
 }
 
 function removeWhitespaceWithDelay(value, cb) {
-  setTimeout(function() {
-    cb(value.replace(/\s*/g, '')); 
+  setTimeout(() => {
+    cb(value.replace(/\s*/g, ''));
   }, 500);
 }
 
@@ -20,7 +20,6 @@ let schema = {};
 describe('schema-validator', () => {
 
   beforeEach(() => {
-
     schema = {};
   });
 
@@ -51,7 +50,6 @@ describe('schema-validator', () => {
       }).catch((err) => {
         done(err);
       });
-
     });
 
     it('should apply filter to specified value before validating', (done) => {
@@ -80,7 +78,7 @@ describe('schema-validator', () => {
         done(err);
       });
 
-    });    
+    });
 
     it('should apply long running filter to specified value before validating', (done) => {
 
@@ -101,7 +99,7 @@ describe('schema-validator', () => {
       };
 
       validator.validate(schema, objectToValidate).then((result) => {
-        
+
         assert(result.valid);
         assert.equal(result.values.phoneNumber, '0299995555');
         done();
@@ -109,7 +107,7 @@ describe('schema-validator', () => {
         done(err);
       });
 
-    });    
+    });
 
     it('should apply filter to multiple values before validating', (done) => {
 
@@ -139,7 +137,7 @@ describe('schema-validator', () => {
       };
 
       validator.validate(schema, objectToValidate).then((result) => {
-        
+
         assert(result.valid);
         assert.equal(result.values.firstName, 'Mario');
         assert.equal(result.values.phoneNumber, '0299995555');
@@ -148,7 +146,7 @@ describe('schema-validator', () => {
         done(err);
       });
 
-    }); 
+    });
 
     it('should default value and filter where object property has not been defined', (done) => {
 
@@ -170,12 +168,12 @@ describe('schema-validator', () => {
           }
         }
       };
-      
+
       const objectToValidate = {
-        firstName: 'Mar io'  // phoneNumber has not yet been defined        
+        firstName: 'Mar io'  // phoneNumber has not yet been defined
       };
 
-      validator.validate(schema, objectToValidate).then((result) => {  
+      validator.validate(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, true);
         assert.equal(result.values.firstName, 'Mario');
         assert.equal(result.values.phoneNumber, '');
@@ -185,7 +183,7 @@ describe('schema-validator', () => {
       });
 
     });
-    
+
     it('should return true when valid for multiple properties on schema', (done) => {
 
       schema = {
@@ -211,7 +209,7 @@ describe('schema-validator', () => {
           }
         }
       };
-      
+
       const objectToValidate = {
         firstName: 'Im here',
         lastName: 'And here',
@@ -361,6 +359,7 @@ describe('schema-validator', () => {
       };
 
       validator.validate(schema, objectToValidate).then((result) => {
+        console.log(result);
         assert.equal(result.valid, true);
         done();
       }).catch((err) => {
@@ -369,7 +368,7 @@ describe('schema-validator', () => {
 
     });
 
-    it('should return values of valid fields only', () => {
+    it('should return values of valid fields only', (done) => {
 
       schema = {
         firstName: {
@@ -394,11 +393,67 @@ describe('schema-validator', () => {
         }
       };
 
-      return validator.validate(schema, {firstName: 'Matt', lastName: 'Turner'})
-        .then(result => assert.deepEqual(result.values, {firstName: 'Matt'}))
-        ;
+      validator.validate(schema, {firstName: 'Matt', lastName: 'Turner'})
+        .then((result) => {
+          assert.deepEqual(result.values, {firstName: 'Matt'});
+          done();
+        });
     });
-    
+
+    it('should validate nested JSON objects', (done) => {
+
+      schema = {
+        hospitalProduct: {
+          filters: [],
+          validators: [
+            [validate.required, 'Not an object']
+          ],
+          empty: {
+            default: ''
+          },
+          children: {
+            code: {
+              filters: [],
+              validators: [
+                [validate.required, 'Not an object']
+              ],
+              empty: {
+                default: 'none'
+              },
+              children: {
+                extrasCode: {
+                  filters: [],
+                  validators: [
+                    [validate.maxlength(2)]
+                  ],
+                  empty: {
+                    default: ''
+                  }
+                },
+                abc: {
+                  filters: [],
+                  validators: [
+                    [validate.maxlength(2), 'abc must be less than 2 chars']
+                  ],
+                  empty: {
+                    default: ''
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+
+      validator.validate(schema, {hospitalProduct: {code: {extrasCode: '12', abc: 'more than 2 chars'}}})
+        .then((result) => {
+          assert.equal(result.valid, false);
+          done();
+        }).catch((err) => {
+          done(err);
+        });
+    });
+
   });
-  
+
 });

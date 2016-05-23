@@ -91,6 +91,55 @@ validator.validate(schema, values2).then(result => {
 
 ```
 
+## Validating complex JSON schemas
+You can validate nested JSON objects by adding a ```children``` object. A children object should follow the same schema as the original Schema object. See example below:
+
+```
+schema = {
+        hospitalProduct: {
+          filters: [],
+          validators: [
+            [validate.required, 'Not an object']
+          ],
+          empty: {
+            default: ''
+          },
+          children: {
+            code: {
+              filters: [],
+              validators: [
+                [validate.required, 'Code is a required object']
+              ],
+              empty: {
+                default: 'none'
+              },
+              children: {
+                extrasCode: {
+                  filters: [],
+                  validators: [
+                    [validate.maxlength(2)]
+                  ],
+                  empty: {
+                    default: ''
+                  }
+                },
+                abc: {
+                  filters: [],
+                  validators: [
+                    [validate.maxlength(2)]
+                  ],
+                  empty: {
+                    default: ''
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+```
+
+
 ## API
 
 ### .validate(schema, values) : Promise
