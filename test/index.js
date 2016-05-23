@@ -359,7 +359,6 @@ describe('schema-validator', () => {
       };
 
       validator.validate(schema, objectToValidate).then((result) => {
-        console.log(result);
         assert.equal(result.valid, true);
         done();
       }).catch((err) => {
@@ -400,58 +399,106 @@ describe('schema-validator', () => {
         });
     });
 
-    it('should validate nested JSON objects', (done) => {
+    describe('Validating nested JSON objects', () => {
 
-      schema = {
-        hospitalProduct: {
-          filters: [],
-          validators: [
-            [validate.required, 'Not an object']
-          ],
-          empty: {
-            default: ''
-          },
-          children: {
-            code: {
-              filters: [],
-              validators: [
-                [validate.required, 'Not an object']
-              ],
-              empty: {
-                default: 'none'
-              },
-              children: {
-                extrasCode: {
-                  filters: [],
-                  validators: [
-                    [validate.maxlength(2)]
-                  ],
-                  empty: {
-                    default: ''
-                  }
+      it('should validate nested objects successfully', (done) => {
+
+        schema = {
+          hospitalProduct: {
+            filters: [],
+            validators: [
+              [validate.required, 'Not an object']
+            ],
+            empty: {
+              default: ''
+            },
+            children: {
+              code: {
+                filters: [],
+                validators: [
+                  [validate.required, 'Not an object']
+                ],
+                empty: {
+                  default: 'none'
                 },
-                abc: {
-                  filters: [],
-                  validators: [
-                    [validate.maxlength(2), 'abc must be less than 2 chars']
-                  ],
-                  empty: {
-                    default: ''
+                children: {
+                  extrasCode: {
+                    filters: [],
+                    validators: [
+                      [validate.maxlength(2)]
+                    ],
+                    empty: {
+                      default: ''
+                    }
+                  },
+                  abc: {
+                    filters: [],
+                    validators: [
+                      [validate.maxlength(2), 'abc must be less than 2 chars']
+                    ],
+                    empty: {
+                      default: ''
+                    }
                   }
                 }
               }
             }
           }
-        }
-      };
+        };
 
-      validator.validate(schema, {hospitalProduct: {code: {extrasCode: '12', abc: 'more than 2 chars'}}})
-        .then((result) => {
-          assert.equal(result.valid, false);
-          done();
-        }).catch((err) => {
-          done(err);
-        });
+        validator.validate(schema, {hospitalProduct: {code: {extrasCode: '12', abc: 'm1'}}})
+          .then((result) => {
+            assert.equal(result.valid, true);
+            done();
+          }).catch((err) => {
+            done(err);
+          });
+      });
+
+      it('should fail when a nested field doesn\'t match validation', (done) => {
+
+        schema = {
+          hospitalProduct: {
+            filters: [],
+            validators: [
+              [validate.required, 'Not an object']
+            ],
+            empty: {
+              default: ''
+            },
+            children: {
+              code: {
+                filters: [],
+                validators: [
+                  [validate.required, 'Not an object']
+                ],
+                empty: {
+                  default: 'none'
+                },
+                children: {
+                  abc: {
+                    filters: [],
+                    validators: [
+                      [validate.maxlength(2), 'abc must be less than 2 chars']
+                    ],
+                    empty: {
+                      default: ''
+                    }
+                  }
+                }
+              }
+            }
+          }
+        };
+
+        validator.validate(schema, {hospitalProduct: {code: {abc: 'more than 2 chars'}}})
+          .then((result) => {
+            assert.equal(result.valid, false);
+            done();
+          }).catch((err) => {
+            done(err);
+          });
+      });
     });
 
   });
