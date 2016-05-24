@@ -8,6 +8,50 @@ A Universal-JavaScript utility for validating value objects.
 
 ## Usage
 
+Validation is done by representing your 
+javascript objects as a schema or set of nested schemas for more complex objects.
+Schemas take the following form:
+###Schema Example
+
+```javascript
+{
+  filters: []
+  validators: [],
+  empty: {
+    default: null
+  },
+  children: {
+  }
+}
+```
+
+###Validators
+Validators are simple functions that take a single value and should return a boolean if
+validation has passed for the specified value.
+
+###Example
+```javascript
+function (value) {
+  return value !== 'something';
+}
+```
+
+###Filters
+Filters are ran before validation and are used to normalise values. eg. Performing ```.toUpper``` on values.
+
+###Example
+```javascript
+function (value) {
+  return value.toUpper();
+}
+```
+
+###Defaulting values
+Values can be defaulted before validation if the value of the property is ```null```, ```undefined``` or an empty string.
+Note: Validation is not run on defaulted values. It is assumed that your defaulted values are valid.
+Undefined values that do not have a default value result in an error.
+
+#Example
 ```javascript
 const validator = require('@nib/schema/validator');
 const validate = require('@nib/validation-methods');
@@ -88,11 +132,12 @@ validator.validate(schema, values2).then(result => {
   console.log(result.values); //{firstName: 'Homer', lastName: 'Simpson, phoneNumber: null, email: 'homer@simpson.com'}
   console.log(result.errors); //{}
 });
-
 ```
 
 ## Validating complex JSON schemas
-You can validate nested JSON objects by adding a ```children``` object. A children object should follow the same schema as the original Schema object. See example below:
+You can validate nested JSON objects by adding a ```children``` object. 
+Child schemas should follow the same schema as the original Schema object. 
+See example below:
 
 ```
 schema = {
@@ -138,7 +183,11 @@ schema = {
         }
       };
 ```
-
+##Note about ```filters``` and ```children```
+Filters and children are currently incombatible with each other.
+If filters are specified then child schemas **will not** be evaluated,
+however any validators for a property that has children will be ran as well as the validations
+for every nested children.
 
 ## API
 
