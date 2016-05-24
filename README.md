@@ -11,7 +11,6 @@ A Universal-JavaScript utility for validating value objects.
 Validation is done by representing your 
 javascript objects as a schema or set of nested schemas for more complex objects.
 Schemas take the following form:
-###Schema Example
 
 ```javascript
 {
@@ -29,7 +28,6 @@ Schemas take the following form:
 Validators are simple functions that take a single value and should return a boolean if
 validation has passed for the specified value.
 
-###Example
 ```javascript
 function (value) {
   return value !== 'something';
@@ -39,7 +37,6 @@ function (value) {
 ###Filters
 Filters are ran before validation and are used to normalise values. eg. Performing ```.toUpper``` on values.
 
-###Example
 ```javascript
 function (value) {
   return value.toUpper();
