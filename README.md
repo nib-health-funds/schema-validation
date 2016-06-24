@@ -8,7 +8,7 @@ A Universal-JavaScript utility for validating value objects.
 
 ## Usage
 
-Validation is done by representing your 
+Validation is done by representing your
 javascript objects as a schema or set of nested schemas for more complex objects.
 Schemas take the following form:
 
@@ -131,13 +131,15 @@ validator.validate(schema, values2).then(result => {
 });
 ```
 
-## Validating complex JSON schemas
-You can validate nested JSON objects by adding a ```children``` object. 
-Child schemas should follow the same schema as the original Schema object. 
+## Nested objects
+
+You can validate nested objects by adding a ```children``` sections to the
+schema. Child schemas should follow the same schema as the original Schema object.
+
 See example below:
 
 ```
-schema = {
+const schema = {
         hospitalProduct: {
           filters: [],
           validators: [
@@ -159,7 +161,7 @@ schema = {
                 extrasCode: {
                   filters: [],
                   validators: [
-                    [validate.maxlength(2)]
+                    [validate.maxlength(2), 'extrasCode must be less than 2 chars']
                   ],
                   empty: {
                     default: ''
@@ -168,7 +170,7 @@ schema = {
                 abc: {
                   filters: [],
                   validators: [
-                    [validate.maxlength(2)]
+                    [validate.maxlength(2), 'abc must be less than 2 chars']
                   ],
                   empty: {
                     default: ''
@@ -179,9 +181,39 @@ schema = {
           }
         }
       };
+
+const values1 = {
+  hospitalProduct: {
+    code: {
+      extrasCode: '12',
+      abc: 'm1'
+    }
+  }
+};
+
+validator.validate(schema, values1).then(result => {
+  console.log(result.valid);  //true
+  console.log(result.values); //{hospitalProduct: {code: {extrasCode: '12', abc: 'm1'}}}
+  console.log(result.errors); //{}
+});
+
+const values2 = {
+  hospitalProduct: {
+    code: {
+      extrasCode: '12',
+      abc: 'toolong'
+    }
+  }
+};
+
+validator.validate(schema, values2).then(result => {
+    console.log(result.valid);  //false
+    console.log(result.values); //{hospitalProduct: {code: {extrasCode: '12' }}}
+    console.log(result.errors); //{hospitalProduct: {code: {abc: 'abc must be less than 2 chars'}}}
+});
 ```
 ##Note about ```filters``` and ```children```
-Filters and children are currently incombatible with each other.
+Filters and children are currently incompatible with each other.
 If filters are specified then child schemas **will not** be evaluated,
 however any validators for a property that has children will be ran as well as the validations
 for every nested children.
@@ -191,4 +223,3 @@ for every nested children.
 ### .validate(schema, values) : Promise
 
 Validate all the fields, even where values are not provided.
-
