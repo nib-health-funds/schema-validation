@@ -46,6 +46,8 @@ describe('schema-validator', () => {
 
       validator.validate(schema, objectToValidate).then((result) => {
         assert(result.valid);
+        assert.deepEqual(result.values, {firstName: 'Imhere'});
+        assert.deepEqual(result.errors, {});
         done();
       }).catch((err) => {
         done(err);
@@ -73,6 +75,7 @@ describe('schema-validator', () => {
       validator.validate(schema, objectToValidate).then((result) => {
         assert(result.valid);
         assert.equal(result.values.phoneNumber, '0299995555');
+        assert.deepEqual(result.errors, {});
         done();
       }).catch((err) => {
         done(err);
@@ -102,6 +105,7 @@ describe('schema-validator', () => {
 
         assert(result.valid);
         assert.equal(result.values.phoneNumber, '0299995555');
+        assert.deepEqual(result.errors, {});
         done();
       }).catch((err) => {
         done(err);
@@ -141,6 +145,7 @@ describe('schema-validator', () => {
         assert(result.valid);
         assert.equal(result.values.firstName, 'Mario');
         assert.equal(result.values.phoneNumber, '0299995555');
+        assert.deepEqual(result.errors, {});
         done();
       }).catch((err) => {
         done(err);
@@ -177,6 +182,7 @@ describe('schema-validator', () => {
         assert.equal(result.valid, true);
         assert.equal(result.values.firstName, 'Mario');
         assert.equal(result.values.phoneNumber, '');
+        assert.deepEqual(result.errors, {});
         done();
       }).catch((err) => {
         done(err);
@@ -220,6 +226,8 @@ describe('schema-validator', () => {
 
       validator.validate(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, true);
+        assert.deepEqual(result.values, {firstName: 'Imhere', lastName: 'Andhere', middleName: 'Butnothere'});
+        assert.deepEqual(result.errors, {});
         done();
       }).catch((err) => {
         done(err);
@@ -261,6 +269,8 @@ describe('schema-validator', () => {
 
       validator.validate(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
+        assert.deepEqual(result.values, {firstName: 'Imhere', lastName: ''});
+        assert.deepEqual(result.errors, {middleName: 'Your name is too long'});
         done();
       }).catch((err) => {
         done(err);
@@ -304,6 +314,8 @@ describe('schema-validator', () => {
 
       validator.validate(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
+        assert.deepEqual(result.values, {});
+        assert.deepEqual(result.errors, {firstName: 'Your name is too long', lastName: 'Your name is too long', middleName: 'Your name is too long'});
         done();
       }).catch((err) => {
         done(err);
@@ -332,6 +344,8 @@ describe('schema-validator', () => {
 
       validator.validate(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, false);
+        assert.deepEqual(result.values, {});
+        assert.deepEqual(result.errors, {firstName: 'First name contains invalid characters'});
         done();
       }).catch((err) => {
         done(err);
@@ -360,6 +374,8 @@ describe('schema-validator', () => {
 
       validator.validate(schema, objectToValidate).then((result) => {
         assert.equal(result.valid, true);
+        assert.deepEqual(result.values, {firstName: 'MoreThanEightChars'});
+        assert.deepEqual(result.errors, {});
         done();
       }).catch((err) => {
         done(err);
@@ -395,6 +411,7 @@ describe('schema-validator', () => {
       validator.validate(schema, {firstName: 'Matt', lastName: 'Turner'})
         .then((result) => {
           assert.deepEqual(result.values, {firstName: 'Matt'});
+          assert.deepEqual(result.errors, {lastName: 'Sorry, our system hates you.'});
           done();
         });
     });
@@ -449,6 +466,8 @@ describe('schema-validator', () => {
         validator.validate(schema, {hospitalProduct: {code: {extrasCode: '12', abc: 'm1'}}})
           .then((result) => {
             assert.equal(result.valid, true);
+            assert.deepEqual(result.values, {hospitalProduct: {code: {extrasCode: '12', abc: 'm1'}}});
+            assert.deepEqual(result.errors, {});
             done();
           }).catch((err) => {
             done(err);
@@ -458,6 +477,15 @@ describe('schema-validator', () => {
       it('should fail when a nested field doesn\'t match validation', (done) => {
 
         schema = {
+          label: {
+            filters: [removeWhitespace],
+            validators: [
+              [validate.minlength(8), 'label must be at least 8 charcters in length']
+            ],
+            empty: {
+              default: null
+            }
+          },
           hospitalProduct: {
             filters: [],
             validators: [
@@ -486,14 +514,35 @@ describe('schema-validator', () => {
                     }
                   }
                 }
+              },
+              state: {
+                filters: [],
+                validators: [
+                  [validate.required, 'Not an object']
+                ],
+                empty: {
+                  default: 'none'
+                }
               }
             }
           }
         };
 
-        validator.validate(schema, {hospitalProduct: {code: {abc: 'more than 2 chars'}}})
+        const values = {
+          label: 'a label 123',
+          hospitalProduct: {
+            code: {
+              abc: 'more than 2 chars'
+            },
+            state: 'nsw'
+          }
+        };
+
+        validator.validate(schema, values)
           .then((result) => {
             assert.equal(result.valid, false);
+            assert.deepEqual(result.values, {label: 'alabel123', hospitalProduct: {state: 'nsw'}});
+            assert.deepEqual(result.errors, {hospitalProduct: {code: {abc: 'abc must be less than 2 chars'}}});
             done();
           }).catch((err) => {
             done(err);
