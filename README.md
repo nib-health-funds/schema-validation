@@ -1,5 +1,7 @@
 # @nib/schema-validator
 
+[![Build Status](https://travis-ci.org/nib-health-funds/schema-validator.svg?branch=master)](https://travis-ci.org/nib-health-funds/schema-validator)
+
 A Universal-JavaScript utility for validating value objects.
 
 ## Installation
